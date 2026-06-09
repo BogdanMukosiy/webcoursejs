@@ -1,0 +1,25 @@
+{
+  "name": "webcoursejs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://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@github.com/BogdanMukosiy/webcoursejs.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/BogdanMukosiy/webcoursejs/issues"
+  },
+  "homepage": "https://github.com/BogdanMukosiy/webcoursejs#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
