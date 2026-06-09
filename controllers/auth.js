@@ -1,19 +1,19 @@
 const User = require('../models/user');
 
+// Переконайся, що тут написано саме exports.getLogin
 exports.getLogin = (req, res) => {
     res.render('auth/login', {
         path: '/login',
-        pageTitle: 'Авторизація',
-        isAuthenticated: req.session.isLoggedIn
+        pageTitle: 'Авторизація'
     });
 };
 
 exports.postLogin = (req, res) => {
-    // Шукаємо тестового користувача (створимо його в app.js)
     User.findOne()
         .then(user => {
             req.session.isLoggedIn = true;
-            req.session.user = user; // Зберігаємо у сесію
+            // Зберігаємо тільки рядок ID користувача, щоб не було конфлікту BSON
+            req.session.user = { _id: user._id.toString() };
             req.session.save(err => {
                 if (err) console.log(err);
                 res.redirect('/');

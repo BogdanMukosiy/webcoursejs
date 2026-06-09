@@ -5,10 +5,9 @@ const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 
 const User = require('./models/user');
-const authRoutes = require('./routes/auth');
 
-// !!! ВСТАВ СВІЙ РЯДОК ПІДКЛЮЧЕННЯ (локальний або хмарний Atlas)
-const MONGODB_URI = 'mongodb://127.0.0.1:27017/shop';
+// Твій індивідуальний рядок підключення до MongoDB Atlas
+const MONGODB_URI = 'mongodb+srv://bogdan:YAECHNIK123321@coursejs.noaxprk.mongodb.net/shop?retryWrites=true&w=majority&appName=coursejs';
 
 const app = express();
 const store = new MongoDBStore({
@@ -16,12 +15,17 @@ const store = new MongoDBStore({
     collection: 'sessions'
 });
 
+// 1. НАЛАШТУВАННЯ ШАБЛОНІЗАТОРА EJS
 app.set('view engine', 'ejs');
 app.set('views', 'views');
 
-app.use(express.urlencoded({ extended: false }));
+// 2. РОЗДАЧА СТАТИКИ (Обов'язково на самому початку, щоб працював CSS!)
 app.use(express.static(path.join(__dirname, 'public')));
 
+// 3. ПАРСИНГ ДАНИХ ФОРМ
+app.use(express.urlencoded({ extended: false }));
+
+// 4. НАЛАШТУВАННЯ СЕСІЙНОГО МІДЛВАРУ
 app.use(
     session({
         secret: 'my secret',
@@ -31,43 +35,39 @@ app.use(
     })
 );
 
-// ВИКОНАННЯ ЗАВДАННЯ 5: Перевіряємо сесію та ініціалізуємо повноцінну модель користувача
+// 5. МІДЛВАР ДЛЯ РЕЄСТРАЦІЇ ПОВНОЦІННОЇ МОДЕЛІ КОРИСТУВАЧА MONGOOSE
 app.use((req, res, next) => {
     if (!req.session.user) {
         return next();
     }
     User.findById(req.session.user._id)
         .then(user => {
-            req.user = user;
+            req.user = user; // Тепер у req.user є всі методи Mongoose
             next();
         })
         .catch(err => console.log(err));
 });
 
-// Передаємо глобальну змінну авторизації для всіх шаблонів EJS
+// 6. МІДЛВАР ГЛОБАЛЬНИХ ЗМІННИХ ДЛЯ ШАБЛОНІВ EJS
 app.use((req, res, next) => {
     res.locals.isAuthenticated = req.session.isLoggedIn;
     next();
 });
 
-// Підключаємо маршрути
+// 7. ІМПОРТ ТА РЕЄСТРАЦІЯ МАРШРУТІВ MVC
+const authRoutes = require('./routes/auth');
+const shopRoutes = require('./routes/shop');
+const adminRoutes = require('./routes/admin');
+
 app.use(authRoutes);
+app.use(shopRoutes);
+app.use('/admin', adminRoutes); // Адмін-панель з префіксом
 
-// Головна сторінка-заглушка для перевірки стану сесії
-app.get('/', (req, res) => {
-    res.send(`
-    <h1>Головна сторінка</h1>
-    <p>Статус авторизації: ${req.session.isLoggedIn ? 'Залогінений як ' + req.user.name : 'Гість'}</p>
-    ${req.session.isLoggedIn
-        ? '<form action="/logout" method="POST"><button>Вийти</button></form>'
-        : '<a href="/login">Увійти</a>'}
-  `);
-});
-
+// 8. ПІДКЛЮЧЕННЯ ДО БАЗИ ДАНИХ ТА ЗАПУСК СЕРВЕРА
 mongoose
     .connect(MONGODB_URI)
     .then(result => {
-        // Створюємо тестового користувача, якщо в базі нікого немає
+        // Автоматично створюємо тестового користувача, якщо база даних порожня
         return User.findOne();
     })
     .then(user => {
@@ -82,6 +82,12 @@ mongoose
         return user;
     })
     .then(() => {
-        app.listen(3000, () => console.log('Сервер запущено на порту 3000'));
+        app.listen(3000, () => {
+            console.log('===============================================');
+            console.log('Сервер успішно запущено на порту 3000!');
+            console.log('База даних MongoDB Atlas підключена.');
+            console.log('Перейдіть за адресою: http://localhost:3000');
+            console.log('===============================================');
+        });
     })
     .catch(err => console.log(err));

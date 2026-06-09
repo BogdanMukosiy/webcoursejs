@@ -1,0 +1,11 @@
+.login-form {
+    margin-top: 2rem;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgb(197 119 119 / 0, 26);
+    border-radius: 6px;
+    background: #aa5656;
+}
+
+.centered {
+    text-align: center;
+}
