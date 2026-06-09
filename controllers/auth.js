@@ -4,15 +4,16 @@ exports.getLogin = (req, res) => {
     res.render('auth/login', {
         path: '/login',
         pageTitle: 'Авторизація',
-        isAuthenticated: false
+        isAuthenticated: req.session.isLoggedIn
     });
 };
 
 exports.postLogin = (req, res) => {
-    User.findById('60c72b2f9b1d8b2bad123456') // Захардкоджений ID користувача для тесту сесії
+    // Шукаємо тестового користувача (створимо його в app.js)
+    User.findOne()
         .then(user => {
             req.session.isLoggedIn = true;
-            req.session.user = user;
+            req.session.user = user; // Зберігаємо у сесію
             req.session.save(err => {
                 if (err) console.log(err);
                 res.redirect('/');

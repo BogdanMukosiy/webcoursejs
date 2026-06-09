@@ -20,7 +20,10 @@
   },
   "homepage": "https://github.com/BogdanMukosiy/webcoursejs#readme",
   "dependencies": {
+    "connect-mongodb-session": "^5.0.0",
     "ejs": "^6.0.1",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "mongoose": "^9.7.1"
   }
 }
