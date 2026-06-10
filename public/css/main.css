@@ -166,3 +166,25 @@ main {
 .card__actions a {
     margin: 0 0.25rem;
 }
+.user-message {
+    margin: auto;
+    width: 90%;
+    max-width: 20rem;
+    border: 1px solid #3498db;
+    padding: 0.5rem;
+    background: #a9d9f7;
+    text-align: center;
+    border-radius: 3px;
+}
+
+.user-message--error {
+    border-color: #c0392b;
+    background: #f2dede;
+    color: #c0392b;
+}
+
+@media (min-width: 40rem) {
+    .user-message {
+        max-width: 30rem;
+    }
+}

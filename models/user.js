@@ -2,8 +2,23 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
-    name: { type: String, required: true },
-    email: { type: String, required: true },
+    name: {
+        type: String,
+        required: true
+    },
+    email: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    password: {
+        type: String,
+        required: false // Поки що false, якщо тестуємо спрощений signup
+    },
+    status: {
+        type: String,
+        default: 'I am new!' // Початковий статус користувача за замовчуванням
+    },
     cart: {
         items: [
             {
@@ -13,7 +28,6 @@ const userSchema = new Schema({
         ]
     }
 });
-
 userSchema.methods.addToCart = function(product) {
     const cartProductIndex = this.cart.items.findIndex(cp => {
         return cp.productId.toString() === product._id.toString();

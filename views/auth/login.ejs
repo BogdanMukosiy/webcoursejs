@@ -1,26 +1,27 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-    <meta charset="UTF-8">
-    <title>Авторизація</title>
+<%- include('../includes/head.ejs') %>
+<link rel="stylesheet" href="/css/forms.css">
+<link rel="stylesheet" href="/css/auth.css">
 </head>
 <body>
+<%- include('../includes/navigation.ejs') %>
+
 <main>
-    <h1>Вхід до системи</h1>
-    <form action="/login" method="POST">
+    <% if (errorMessage) { %>
+        <div class="user-message user-message--error"><%= errorMessage %></div>
+    <% } %>
+    <form class="login-form" action="/login" method="POST">
         <div class="form-control">
             <label for="email">E-Mail</label>
-            <input type="email" name="email" id="email" required>
+            <input type="email" name="email" id="email" value="<%= oldInput.email %>">
         </div>
         <div class="form-control">
-            <label for="password">Пароль</label>
-            <input type="password" name="password" id="password" required>
+            <label for="password">Password</label>
+            <input type="password" name="password" id="password" value="<%= oldInput.password %>">
         </div>
-        <br>
-        <button type="submit">Увійти</button>
+        <button class="btn" type="submit">Login</button>
     </form>
-    <br>
-    <a href="/">На головну</a>
+    <div class="centered" style="margin-top: 1rem;">
+        <a href="/reset">Reset Password</a>
+    </div>
 </main>
-</body>
-</html>
+<%- include('../includes/end.ejs') %>
