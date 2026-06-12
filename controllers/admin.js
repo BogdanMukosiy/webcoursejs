@@ -10,7 +10,7 @@ exports.getAddProduct = (req, res, next) => {
 };
 
 // POST: Обробка створення нового товару
-exports.postAddProduct = (req, res, next) => {
+exports.postAddProduct = async (req, res, next) => {
     const { title, imageUrl, price, description } = req.body;
 
     const product = new Product({
@@ -18,107 +18,98 @@ exports.postAddProduct = (req, res, next) => {
         price: price,
         description: description,
         imageUrl: imageUrl,
-        userId: req.user // Mongoose автоматично витягне id з повноцінного об'єкта користувача
+        userId: req.user
     });
 
-    product
-        .save()
-        .then(result => {
-            console.log('Товар успішно додано до бази MongoDB Atlas!');
-            res.redirect('/admin/products');
-        })
-        .catch(err => {
-            const error = new Error(err);
-            error.statusCode = 500;
-            return next(error); // Передаємо помилку в глобальний мідлвар в app.js
-        });
+    try {
+        await product.save();
+        console.log('Товар успішно додано до бази MongoDB Atlas!');
+        res.redirect('/admin/products');
+    } catch (err) {
+        const error = new Error(err);
+        error.statusCode = 500;
+        return next(error);
+    }
 };
 
 // GET: Сторінка редагування існуючого товару
-exports.getEditProduct = (req, res, next) => {
+exports.getEditProduct = async (req, res, next) => {
     const editMode = req.query.edit;
     if (!editMode) {
         return res.redirect('/');
     }
     const prodId = req.params.productId;
 
-    Product.findById(prodId)
-        .then(product => {
-            if (!product) {
-                return res.redirect('/');
-            }
-            res.render('admin/edit-product', {
-                pageTitle: 'Редагувати товар',
-                path: '/admin/edit-product',
-                editing: editMode,
-                product: product
-            });
-        })
-        .catch(err => {
-            const error = new Error(err);
-            error.statusCode = 500;
-            return next(error);
+    try {
+        const product = await Product.findById(prodId);
+        if (!product) {
+            return res.redirect('/');
+        }
+        res.render('admin/edit-product', {
+            pageTitle: 'Редагувати товар',
+            path: '/admin/edit-product',
+            editing: editMode,
+            product: product
         });
+    } catch (err) {
+        const error = new Error(err);
+        error.statusCode = 500;
+        return next(error);
+    }
 };
 
 // POST: Обробка збереження змін після редагування
-exports.postEditProduct = (req, res, next) => {
+exports.postEditProduct = async (req, res, next) => {
     const { productId, title, price, imageUrl, description } = req.body;
 
-    Product.findById(productId)
-        .then(product => {
-            if (!product) {
-                return res.redirect('/');
-            }
-            // Оновлюємо поля документа
-            product.title = title;
-            product.price = price;
-            product.description = description;
-            product.imageUrl = imageUrl;
+    try {
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.redirect('/');
+        }
 
-            return product.save();
-        })
-        .then(result => {
-            console.log('Товар успішно оновлено!');
-            res.redirect('/admin/products');
-        })
-        .catch(err => {
-            const error = new Error(err);
-            error.statusCode = 500;
-            return next(error);
-        });
+        product.title = title;
+        product.price = price;
+        product.description = description;
+        product.imageUrl = imageUrl;
+
+        await product.save();
+        console.log('Товар успішно оновлено!');
+        res.redirect('/admin/products');
+    } catch (err) {
+        const error = new Error(err);
+        error.statusCode = 500;
+        return next(error);
+    }
 };
 
 // GET: Відображення списку товарів адміна
-exports.getProducts = (req, res, next) => {
-    // Показуємо товари, які належать виключно поточному авторизованому користувачу
-    Product.find({ userId: req.user._id })
-        .then(products => {
-            res.render('admin/products', {
-                prods: products,
-                pageTitle: 'Адмін-товари',
-                path: '/admin/products'
-            });
-        })
-        .catch(err => {
-            const error = new Error(err);
-            error.statusCode = 500;
-            return next(error);
+exports.getProducts = async (req, res, next) => {
+    try {
+        const products = await Product.find({ userId: req.user._id });
+        res.render('admin/products', {
+            prods: products,
+            pageTitle: 'Адмін-товари',
+            path: '/admin/products'
         });
+    } catch (err) {
+        const error = new Error(err);
+        error.statusCode = 500;
+        return next(error);
+    }
 };
 
 // POST: Видалення товару з бази даних
-exports.postDeleteProduct = (req, res, next) => {
+exports.postDeleteProduct = async (req, res, next) => {
     const prodId = req.body.productId;
 
-    Product.findByIdAndDelete(prodId)
-        .then(() => {
-            console.log('Товар успішно видалено з бази даних.');
-            res.redirect('/admin/products');
-        })
-        .catch(err => {
-            const error = new Error(err);
-            error.statusCode = 500;
-            return next(error);
-        });
+    try {
+        await Product.findByIdAndDelete(prodId);
+        console.log('Товар успішно видалено з бази даних.');
+        res.redirect('/admin/products');
+    } catch (err) {
+        const error = new Error(err);
+        error.statusCode = 500;
+        return next(error);
+    }
 };
